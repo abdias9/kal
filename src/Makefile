@@ -37,6 +37,9 @@ math.o: math.c
 memory.o: memory.c
 	$(CC) -c memory.c -o memory.o $(CFLAGS)
 
+#shell.o: shell.c
+#	$(CC) -c shell.c -o shell.o $(CFLAGS)
+
 clean: 
 	rm -rf *.o
 

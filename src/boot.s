@@ -22,7 +22,7 @@
 # then allocating 16384 bytes for it, and finally creating a symbol at the top.
 .section .bootstrap_stack, "aw", @nobits
 stack_bottom:
-.skip 16384 # 16 KiB
+.skip 32768 # 16 KiB
 stack_top:
 
 # The linker script specifies _start as the entry point to the kernel and the

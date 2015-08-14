@@ -21,6 +21,10 @@
 #define THEME_RED (COLOR_RED | COLOR_BLACK << 4)
 #define THEME_STD (COLOR_WHITE | COLOR_BLACK << 4)
 #define THEME_GREEN (COLOR_GREEN | COLOR_BLACK << 4)
+#define THEME_TITLE (COLOR_WHITE | COLOR_DARK_GREY << 4)
+
+#define vga_terminal_printf printf
+#define vga_terminal_puts puts
 
 #define VGA_W 80
 #define VGA_H 25

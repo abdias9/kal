@@ -3,6 +3,7 @@
 #include "string.h"
 #include "sys.h"
 #include "keys.h"
+#include "memory.h"
 
 uint8_t vga_build_color(uint8_t fg, uint8_t bg) {
 	return fg | bg << 4;
@@ -108,7 +109,10 @@ char* vga_terminal_getstring() {
 			str[len++] = keys[scan];
 		}
 		last_scan = scan;
-	} while (keys[scan] != '\n');
+		if (keys[scan] == '\n' && len > 0)
+			break;
+	} while (1);
+	
 	str[strlen(str)] = '\0';
 	return str;
 }
@@ -127,9 +131,13 @@ int vga_terminal_printf(const char* format, ...) {
 				case 's':
 					vga_terminal_puts(va_arg(vl, char*));
 					break;
-				case 'd':
-					vga_terminal_puts(itoa(va_arg(vl, int), BASE_DECIMAL));
+				case 'd': {
+					char* va = itoa(va_arg(vl, int), BASE_DECIMAL);
+					vga_terminal_puts(va);
+					//memory_free(va);
+					#warning IMPLEMENTAR MEMORYFREE AQUI
 					break;
+				}
 				case 'f':
 					vga_terminal_puts(ftoa(va_arg(vl, double), 4));
 					break;

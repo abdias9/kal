@@ -1,6 +1,7 @@
 #include "string.h"
 #include "memory.h"
 #include "math.h"
+#include "vga.h"
 
 size_t str_char_count(const char* str, char c) {
 	size_t res = 0;
@@ -8,6 +9,22 @@ size_t str_char_count(const char* str, char c) {
 		if (*str++ == c)
 			res++;
 	return res;
+}
+
+char* strtok(char* str, char c) {
+	size_t i = 0;
+	while (str[i] != 0) {
+		if (str[i] == c) {
+			char* res = (char*) memory_alloc(sizeof(char) * (i + 1));
+			char* temp = (char*) memory_alloc((sizeof(char) * strlen(str) - i + 1));
+			strncpy(res, str, i);
+			strcpy(str, str + i + 1);
+			memory_free(temp);
+			return res;
+		}	
+		i++;
+	}
+	return str;
 }
 
 size_t strlen(const char* str) {

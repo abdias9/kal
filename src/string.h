@@ -9,6 +9,7 @@ uint8_t* memset(uint8_t *dest, uint8_t value, size_t count);
 uint16_t* memsetw(uint16_t *dest, uint16_t value, size_t count);
 size_t memcmp(const uint8_t *ptr1, const uint8_t *ptr2, size_t count);
 
+char* strtok(char* str, char c);
 size_t strlen(const char* str);
 char* strcpy(char* dest, const char* src);
 char* strncpy(char* dest, const char* src, size_t count);

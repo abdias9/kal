@@ -1,59 +1,82 @@
 #include "memory.h"
-#include "math.h"
-#include "vga.h"
+#include "string.h"
 
 void memory_initialize() {
-	mem = (void*) MEMORY_START;
-	uint8_t* block = (uint8_t*) mem;
-	for (size_t bcount = 0; bcount != MEMORY_BLOCKS; bcount++) {
-		bmem[bcount].address = (void*)block++;
-		bmem[bcount].is_free = true;
-		bmem[bcount].is_flag = false;
+	memory_free_block_alloc((void*)MEMORY_EXTENDED_START, (void*)MEMORY_EXTENDED_END);	
+}
+
+void memory_free_block_delete(FreeBlock* block) {
+	uint64_t *ptr = (uint64_t*) block;
+	uint64_t *eptr = (uint64_t*) block;
+	if (ptr[1] == 0) {
+		*ptr = 0;
+		return;
+	}
+
+	while (*(++eptr) != 0);
+	*ptr = *(--eptr);
+	*eptr = 0;
+}
+
+void memory_free_block_alloc(void* start, void* end) {
+	uint64_t *ptr = (uint64_t*)MEMORY_FREE_AREA_START;
+	while (*ptr != 0) 
+		ptr++;
+	FreeBlock* block = (FreeBlock*)ptr;
+	block->start = start;
+	block->end = end;
+}
+
+void memory_free_print_blocks(size_t count) {
+	uint64_t *ptr = (uint64_t*)MEMORY_FREE_AREA_START;
+	for (; count != 0; count--) { 
+		if (*ptr == 0)
+			break;
+		vga_terminal_puts(itoa(memory_free_block_size((FreeBlock*)ptr), 10));
+		vga_terminal_putchar('\n');
+		ptr++;
 	}
 }
 
+uint64_t memory_free_block_size(FreeBlock* block) {
+	return block->end - block->start;
+}
+
 void* memory_alloc(size_t sz) {
-	for (size_t g = 0; g != MEMORY_BLOCKS; g++) {
-		if (bmem[g].is_free) 
-			for (size_t i = 0; i != sz + 1; i++)
-				if (!bmem[g + i].is_free) {
-					g = g + i + 1;
-					break;
-				} else if (g + i + 1 == g + sz) {
-					for (size_t b = 0; b != sz; b++) {
-						bmem[g + b].is_free = false;
-						bmem[g + b].is_flag = false;
-					}
-					bmem[g + sz].is_free = false;
-					bmem[g + sz].is_flag = true;
-					return bmem[g].address;
-				}
-	}
+    FreeBlock* block = (FreeBlock*) MEMORY_FREE_AREA_START;
+    while (*((uint64_t*)block) != 0) {
+        if (memory_free_block_size(block) > sz + 1) {//+1
+            uint8_t* address = (uint8_t*)block->start;
+            block->start += sz + 1; //+1
+			*address = sz;
+            return ++address;
+        }
+		block++;
+    }
 	return NULL;
 }
 
 void memory_free(void* address) {
-	for (size_t i = 0; i != MEMORY_BLOCKS; i++)
-		if (bmem[i].address == address) {
-			for (size_t j = i; j != MEMORY_BLOCKS; j++) {
-				if (bmem[j].is_flag == true) {
-					bmem[j].is_free = true;
-					bmem[j].is_flag = false;
-					return;
-				}
-				bmem[j].is_free = true;
-				bmem[j].is_flag = false;						
-			}
+	uint8_t *p_start = (uint8_t*) address;
+	p_start--;
+	size_t len = *p_start;
+	uint8_t *p_end = (uint8_t*)address;
+	p_end = p_end + len;
+	FreeBlock* block = (FreeBlock*) MEMORY_FREE_AREA_START;
+	while (*((uint64_t*) block) != 0) {
+		if (block->start == p_end) {
+			block->start -= len + 1;
+			return;	
 		}
+		if (block->end + 1 == p_start) {
+			block->end += len + 1;
+			return;
+		}
+		block++;
+	}	
+	memory_free_block_alloc(p_start, p_end);		
 }
 
-void memory_print() {
-	for (size_t i = 0; i != MEMORY_BLOCKS; i++)
-		if (bmem[i].is_flag)
-			vga_terminal_putchar('F');
-		else if (bmem[i].is_free)
-			vga_terminal_putchar('0');
-		else
-			vga_terminal_putchar('X');
-							
+bool memory_free_have_contact(void* address, uint8_t type) {
+	
 }
