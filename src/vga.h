@@ -48,6 +48,8 @@ void vga_terminal_putchar(char c);
 void vga_terminal_set_color(uint8_t color);
 void vga_terminal_puts(const char* str);
 void vga_terminal_puts_colored(const char* str, uint8_t color);
+void vga_terminal_putint(int i);
+void vga_terminal_putfloat(double f);
 char vga_terminal_getchar();
 char* vga_terminal_getstring();
 

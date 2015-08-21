@@ -1,5 +1,5 @@
 CFLAGS=-std=gnu99 -ffreestanding -O2 -nostdlib -lgcc -Wall -Wextra
-OBJ=boot.o kernel.o vga.o string.o sys.o keys.o math.o memory.o
+OBJ=boot.o kernel.o vga.o string.o sys.o keys.o math.o memory.o cdrom.o
 EXEC=../bin/kal.bin
 CC=/opt/cross/bin/i686-elf-gcc
 ASM=/opt/cross/bin/i686-elf-as
@@ -36,6 +36,9 @@ math.o: math.c
 
 memory.o: memory.c
 	$(CC) -c memory.c -o memory.o $(CFLAGS)
+
+cdrom.o: cdrom.c
+	$(CC) -c cdrom.c -o cdrom.o $(CFLAGS)
 
 #shell.o: shell.c
 #	$(CC) -c shell.c -o shell.o $(CFLAGS)

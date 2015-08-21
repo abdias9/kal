@@ -70,6 +70,7 @@ char* strcat(char* dest, const char* src) {
 	size_t start = strlen(dest), i = 0;
 	while (*src != 0)
 		dest[start + i++] = *src++;
+	dest[start + i] = '\0';
 	return dest;
 }
 
@@ -142,7 +143,7 @@ int atoi(char *a) {
 char* itoa(int num, int base) {
 	int i = 0;
 	bool is_negative = false;
-	char* str = (char*) memory_alloc(sizeof(char) * 20);
+	char* str = (char*) memory_alloc(sizeof(char) * 10);
 
 	if (num == 0) {
 		str[i++] = '0';
@@ -170,19 +171,23 @@ char* itoa(int num, int base) {
 }
 
 char* ftoa(double n, int afterpoint) {
-	int left_side_i = (int) n;
+	int left_side_i = (int) n, afterpoint_o = afterpoint;
 	char *left_side = itoa(left_side_i, BASE_DECIMAL);
-	char *right_side = (char*) memory_alloc(sizeof(char) * (afterpoint + 1));
+	char *right_side = (char*) memory_alloc(sizeof(char) * (afterpoint + 2));
 	strcpy(right_side, ".");
 	n -= (double) left_side_i;
 	do {
 		n = n * (double)10;
 		int n_i = (int) n;
 		n -= (double) n_i;
-		strcat(right_side, itoa(n_i, BASE_DECIMAL));
+		char *a = itoa(n_i, BASE_DECIMAL);
+		strcat(right_side, a);
+		free(a);
 	} while (--afterpoint != 0);
-	char* res = (char*)memory_alloc(sizeof(char) * (strlen(left_side) + afterpoint + 1));
+	char* res = (char*)memory_alloc(sizeof(char) * (strlen(left_side) + afterpoint_o + 2));
 	strcpy(res, left_side);
 	strcat(res, right_side);
+	free(left_side);
+	free(right_side);
 	return res;
 }

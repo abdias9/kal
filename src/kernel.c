@@ -22,13 +22,11 @@ void kernel_main() {
 	vga_terminal_puts_colored("[kernel] ", THEME_RED);
 	vga_terminal_puts("Memory management initialized!\n");
 	
-	char* str = (char*) malloc(sizeof(char) * 10);
-	strcpy(str, "000000000");
-	char* str1 = (char*) malloc(sizeof(char) * 5);
-	strcpy(str1, "1111");
-	
-	memory_free(str);
+	char* a = ftoa(25.25, 2);
+	//free(s);
+	//printf("%f", 2.25);
 
-	memory_free_print_blocks(10);
+	//memory_free_print_blocks(10);
+	memory_print_status();
 	
 }

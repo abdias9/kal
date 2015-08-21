@@ -32,8 +32,7 @@ void memory_free_print_blocks(size_t count) {
 	for (; count != 0; count--) { 
 		if (*ptr == 0)
 			break;
-		vga_terminal_puts(itoa(memory_free_block_size((FreeBlock*)ptr), 10));
-		vga_terminal_putchar('\n');
+		vga_terminal_putint(memory_free_block_size((FreeBlock*)ptr));
 		ptr++;
 	}
 }
@@ -45,9 +44,9 @@ uint64_t memory_free_block_size(FreeBlock* block) {
 void* memory_alloc(size_t sz) {
     FreeBlock* block = (FreeBlock*) MEMORY_FREE_AREA_START;
     while (*((uint64_t*)block) != 0) {
-        if (memory_free_block_size(block) > sz + 1) {//+1
+        if (memory_free_block_size(block) > sz + 1) {
             uint8_t* address = (uint8_t*)block->start;
-            block->start += sz + 1; //+1
+            block->start += sz + 1; 
 			*address = sz;
             return ++address;
         }
@@ -58,17 +57,30 @@ void* memory_alloc(size_t sz) {
 
 void memory_free(void* address) {
 	uint8_t *p_start = (uint8_t*) address;
-	p_start--;
-	size_t len = *p_start;
-	uint8_t *p_end = (uint8_t*)address;
-	p_end = p_end + len;
+	uint8_t *p_end = p_start;
+	uint8_t len = *(--p_start);
+	p_end += len;
 	FreeBlock* block = (FreeBlock*) MEMORY_FREE_AREA_START;
 	while (*((uint64_t*) block) != 0) {
 		if (block->start == p_end) {
+			FreeBlock* block2 = block;
+			while (*((uint64_t*)(++block2)) != 0) 
+				if (block2->end == p_start) {
+					block2->end = block->end;
+					memory_free_block_delete(block);
+					return;
+				}
 			block->start -= len + 1;
 			return;	
 		}
-		if (block->end + 1 == p_start) {
+		if (block->end == p_start) {
+			FreeBlock* block2 = block;
+			while (*((uint64_t*)(++block2)) != 0) 
+				if (block2->start == p_end) {
+					block->end = block2->end;
+					memory_free_block_delete(block2);
+					return;
+				}
 			block->end += len + 1;
 			return;
 		}
@@ -77,6 +89,12 @@ void memory_free(void* address) {
 	memory_free_block_alloc(p_start, p_end);		
 }
 
-bool memory_free_have_contact(void* address, uint8_t type) {
-	
+void memory_print_status() {
+	size_t free_bytes = 0, total = MEMORY_EXTENDED_END - MEMORY_EXTENDED_START;
+	FreeBlock* block = (FreeBlock*) MEMORY_FREE_AREA_START;
+	while (*((uint64_t*) block) != 0) {
+		free_bytes += memory_free_block_size(block);
+		block++;
+	}
+	printf("Used: %d bytes\nFree: %d bytes\nTotal: %d bytes\n", total - free_bytes, free_bytes, total);	
 }

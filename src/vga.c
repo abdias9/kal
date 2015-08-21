@@ -36,6 +36,18 @@ void vga_terminal_putchar_at(char c, uint8_t color, size_t x, size_t y) {
 	vga_terminal_update_caret();
 }
 
+void vga_terminal_putint(int i) {
+	char* s = itoa(i, BASE_DECIMAL);
+	printf("%s\n", s);
+	free(s);
+}
+
+void vga_terminal_putfloat(double f) {
+	char* s = ftoa(f, 2);
+	printf("%s\n", s);
+	free(s);
+}
+
 void vga_terminal_putchar(char c) {
 	switch (c) {
 		case '\n':
@@ -134,13 +146,15 @@ int vga_terminal_printf(const char* format, ...) {
 				case 'd': {
 					char* va = itoa(va_arg(vl, int), BASE_DECIMAL);
 					vga_terminal_puts(va);
-					//memory_free(va);
-					#warning IMPLEMENTAR MEMORYFREE AQUI
+					free(va);
 					break;
 				}
-				case 'f':
-					vga_terminal_puts(ftoa(va_arg(vl, double), 4));
+				case 'f': {
+					char* va = ftoa(va_arg(vl, double), 4);
+					vga_terminal_puts(va);
+					free(va);
 					break;
+				}
 				case 'b':
 					if (va_arg(vl, int))
 						vga_terminal_puts("True");
