@@ -1,9 +1,5 @@
-#if defined(__linux__)
-#error "NOT INTO LINUX!"
-#endif
-
-#if !defined(__i386__)
-#error "Invalid Compiler!"
+#ifndef __i386__
+#error "Invalid Architecture!"
 #endif
 
 #include "vga.h"
